@@ -10,52 +10,90 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # Define pattern groups
 PATTERNS = {
-    'xss_patterns': [
+    'direct_output': [
         # Direct Use of Unescaped Data in Output
         (r'echo\s+.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'print\s+.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'\$_(POST|GET|REQUEST|COOKIE)\s*;', ''),
-
+    ],
+    'html_attributes': [
         # Direct Use of Unescaped Data in HTML Attributes
         (r'\bvalue\s*=\s*[\'"].*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'\bdata-\w+\s*=\s*[\'"].*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-
+    ],
+    'javascript_context': [
         # JavaScript Context
         (r'<script\b[^>]*>.*\$_(POST|GET|REQUEST|COOKIE)\b.*</script>', ''),
         (r'location\.href\s*=\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'document\.write\s*\(.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'innerHTML\s*=\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-
+    ],
+    'event_handlers': [
         # Dynamic Event Handlers
         (r'on(click|load|mouseover|etc)\s*=\s*[\'"].*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-
+    ],
+    'url_redirection': [
         # URL Redirection
         (r'header\s*\(\s*[\'"]Location:\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'window\.location\s*=\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-
+    ],
+    'html_tags': [
         # Untrusted Data in HTML Tags
         (r'<iframe\b[^>]*src\s*=\s*[\'"].*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'<img\b[^>]*src\s*=\s*[\'"].*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-
+    ],
+    'javascript_functions': [
         # JavaScript Functions
         (r'eval\s*\(.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'setTimeout\s*\(.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'setInterval\s*\(.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-
+    ],
+    'reflected_stored_xss': [
         # Reflected and Stored XSS
         (r'echo\s*\$_(POST|GET|REQUEST|COOKIE)\s*;', ''),
         (r'print\s*\$_(POST|GET|REQUEST|COOKIE)\s*;', ''),
-
+    ],
+    'csp_bypasses': [
         # Content Security Policy Bypasses
         (r'<style\b[^>]*>.*\$_(POST|GET|REQUEST|COOKIE)\b.*</style>', ''),
-
+    ],
+    'json_handling': [
         # Handling of JSON Data
         (r'json_encode\s*\(.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'json_decode\s*\(.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-
+    ],
+    'miscellaneous': [
         # Miscellaneous Patterns
         (r'<a\b[^>]*href\s*=\s*[\'"].*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'<object\b[^>]*data\s*=\s*[\'"].*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
+    ],
+    'wordpress': [
+        # SQL Injection Vulnerabilities
+        (r'\$wpdb->query\s*\(.*[^\)]\s*\)', ''),
+        (r'mysql_query\s*\(.*[^\)]\s*\)', ''),
+        (r'mysqli_query\s*\(.*[^\)]\s*\)', ''),
+        # File Inclusion Vulnerabilities
+        (r'include\s*\(.*\$_(POST|GET|REQUEST|COOKIE)\b.*\)', ''),
+        (r'require\s*\(.*\$_(POST|GET|REQUEST|COOKIE)\b.*\)', ''),
+        (r'include_once\s*\(.*\$_(POST|GET|REQUEST|COOKIE)\b.*\)', ''),
+        (r'require_once\s*\(.*\$_(POST|GET|REQUEST|COOKIE)\b.*\)', ''),
+        # Insecure Function Usage
+        (r'eval\s*\(.*\)', ''),
+        (r'exec\s*\(.*\)', ''),
+        (r'system\s*\(.*\)', ''),
+        (r'passthru\s*\(.*\)', ''),
+        (r'shell_exec\s*\(.*\)', ''),
+        # Unsafe Usage of `unserialize`
+        (r'unserialize\s*\(\s*\$_(POST|GET|REQUEST|COOKIE)\b.*\)', ''),
+    ],
+    'blade': [
+        # Unsafe Output Rendering
+        (r'\{!!.*!!\}', ''),
+        # Direct Access to User Input
+        (r'\{\{\s*\$_(POST|GET|REQUEST|COOKIE)\b.*\}\}', ''),
+        # Usage of Dangerous Blade Directives
+        (r'@php', ''),
+        (r'@inject\s*\(.*\)', ''),
     ],
 }
 

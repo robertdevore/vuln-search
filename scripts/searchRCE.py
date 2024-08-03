@@ -10,7 +10,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # Define pattern groups for Remote Code Execution detection
 PATTERNS = {
-    'remote_code_execution': [
+    # General Patterns
+    'general_exec_functions': [
         # Unsafe use of exec functions with user input
         (r'exec\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'system\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
@@ -19,26 +20,59 @@ PATTERNS = {
         (r'proc_open\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'passthru\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'pcntl_exec\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-
+    ],
+    'general_eval_functions': [
         # Unsafe use of eval and similar functions with user input
         (r'eval\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'assert\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'create_function\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-        (r'include\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-        (r'require\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-        (r'include_once\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-        (r'require_once\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-
-        # Dynamic function calls with user input
-        (r'\$.*\(\s*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-
+    ],
+    'general_file_inclusion': [
         # PHP file inclusion with user input
         (r'\binclude\b\s*\(\s*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'\brequire\b\s*\(\s*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
         (r'\binclude_once\b\s*\(\s*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
-        (r'\brequire_once\b\s*\(\s*\$_(POST|GET|COOKIE)\b', ''),
+        (r'\brequire_once\b\s*\(\s*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
     ],
-    # Additional groups can be added here if needed
+    'general_dynamic_function_calls': [
+        # Dynamic function calls with user input
+        (r'\$.*\(\s*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
+    ],
+
+    # WordPress Specific Patterns
+    'wordpress_file_uploads': [
+        # Insecure file uploads
+        (r'move_uploaded_file\s*\(\s*\$_FILES\[.*\]\[\'tmp_name\'\].*', ''),
+    ],
+    'wordpress_plugin_theme_functions': [
+        # Insecure plugin/theme function usage
+        (r'do_action\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
+        (r'apply_filters\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
+    ],
+    'wordpress_arbitrary_file_inclusion': [
+        # Arbitrary file inclusion
+        (r'include\s*\(\s*.*\$_SERVER\[\'DOCUMENT_ROOT\'\]\s*.\s*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
+    ],
+
+    # Laravel and Blade Specific Patterns
+    'blade_insecure_syntax': [
+        # Insecure Blade syntax
+        (r'@php', ''),
+        (r'\{!!.*!!\}', ''),
+    ],
+    'laravel_file_handling': [
+        # Insecure file handling
+        (r'Storage::put\s*\(\s*.*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
+    ],
+    'laravel_dynamic_route_definitions': [
+        # Dynamic route definitions
+        (r'Route::.*\(\s*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
+    ],
+    'laravel_unserialize_eval': [
+        # Unsafe use of unserialize or eval
+        (r'unserialize\s*\(\s*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
+        (r'eval\s*\(\s*\$_(POST|GET|REQUEST|COOKIE)\b', ''),
+    ],
 }
 
 def signal_handler(signal, frame):

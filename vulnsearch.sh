@@ -7,8 +7,8 @@
 usage() {
   echo "Usage: $0 --directory DIRECTORY [--patterns PATTERN] [--tools INDEXES]"
   echo "  --directory DIRECTORY (Required) Directory to scan for PHP files."
-  echo "  --patterns PATTERN    (Optional) The pattern to pass to the scripts. Default is 'all'."
-  echo "  --tools INDEXES       (Optional) Comma-separated list of tool indices to run."
+  echo "  --patterns  PATTERN   (Optional) The pattern to pass to the scripts. Default is 'all'."
+  echo "  --tools     INDEXES   (Optional) Comma-separated list of tool indices to run."
   echo "                        Indices start from 1 and correspond to the order of scripts found."
   exit 1
 }
@@ -62,7 +62,7 @@ fi
 for INDEX in "${SELECTED_TOOLS[@]}"; do
   SCRIPT_INDEX=$((INDEX-1))
   if [ -n "${SCRIPTS[$SCRIPT_INDEX]}" ] && [ -f "${SCRIPTS[$SCRIPT_INDEX]}" ]; then
-    echo "Running ${SCRIPTS[$SCRIPT_INDEX]}"
+    echo -e "\n[*] Running ${SCRIPTS[$SCRIPT_INDEX]}"
     if [ -n "$PATTERNS" ]; then
       python3 "${SCRIPTS[$SCRIPT_INDEX]}" --patterns "$PATTERNS" --directory "$DIRECTORY"
     else
