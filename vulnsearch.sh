@@ -5,16 +5,16 @@
 
 # Function to display usage instructions
 usage() {
-  echo "Usage: $0 --patterns PATTERN [--tools INDEXES] [--directory DIRECTORY]"
-  echo "  --patterns PATTERN    The pattern to pass to the scripts."
+  echo "Usage: $0 --directory DIRECTORY [--patterns PATTERN] [--tools INDEXES]"
+  echo "  --directory DIRECTORY (Required) Directory to scan for PHP files."
+  echo "  --patterns PATTERN    (Optional) The pattern to pass to the scripts. Default is 'all'."
   echo "  --tools INDEXES       (Optional) Comma-separated list of tool indices to run."
   echo "                        Indices start from 1 and correspond to the order of scripts found."
-  echo "  --directory DIRECTORY (Optional) Directory to scan for PHP files."
   exit 1
 }
 
 # Initialize variables
-PATTERNS=""
+PATTERNS="all"  # Default pattern
 DIRECTORY=""
 SELECTED_TOOLS=()
 
@@ -25,12 +25,12 @@ while [[ $# -gt 0 ]]; do
       PATTERNS=$2
       shift 2
       ;;
-    --tools)
-      IFS=',' read -r -a SELECTED_TOOLS <<< "$2"
-      shift 2
-      ;;
     --directory)
       DIRECTORY=$2
+      shift 2
+      ;;
+    --tools)
+      IFS=',' read -r -a SELECTED_TOOLS <<< "$2"
       shift 2
       ;;
     *)
@@ -39,8 +39,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Check if patterns argument is provided
-if [ -z "$PATTERNS" ]; then
+# Check if directory argument is provided
+if [ -z "$DIRECTORY" ]; then
+  echo "Error: --directory option is required."
   usage
 fi
 
@@ -62,10 +63,10 @@ for INDEX in "${SELECTED_TOOLS[@]}"; do
   SCRIPT_INDEX=$((INDEX-1))
   if [ -n "${SCRIPTS[$SCRIPT_INDEX]}" ] && [ -f "${SCRIPTS[$SCRIPT_INDEX]}" ]; then
     echo "Running ${SCRIPTS[$SCRIPT_INDEX]}"
-    if [ -n "$DIRECTORY" ]; then
+    if [ -n "$PATTERNS" ]; then
       python3 "${SCRIPTS[$SCRIPT_INDEX]}" --patterns "$PATTERNS" --directory "$DIRECTORY"
     else
-      python3 "${SCRIPTS[$SCRIPT_INDEX]}" --patterns "$PATTERNS"
+      python3 "${SCRIPTS[$SCRIPT_INDEX]}" --directory "$DIRECTORY"
     fi
   else
     echo "Warning: Tool index $INDEX does not exist or file not found. Skipping."

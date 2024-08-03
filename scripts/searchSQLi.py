@@ -160,14 +160,14 @@ def parse_arguments():
     parser.add_argument(
         '--patterns',
         choices=list(PATTERNS.keys()) + ['all'],
-        help='Select the pattern group to use.',
-        required=True
+        default='all',
+        help="Select the pattern group to use. Defaults to 'all'."
     )
     parser.add_argument(
         '--directory',
         type=str,
-        default=os.getcwd(),
-        help='The directory to scan for PHP files. Defaults to the current working directory.'
+        required=True,
+        help="The directory to scan for PHP files. This argument is required."
     )
     return parser.parse_args()
 
@@ -206,7 +206,7 @@ def main():
     args = parse_arguments()
 
     try:
-        # Get the target directory from arguments or use the current directory
+        # Get the target directory from arguments
         target_directory = args.directory
 
         # Find all PHP files in the target directory and subdirectories
