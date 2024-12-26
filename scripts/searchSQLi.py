@@ -242,8 +242,6 @@ def main():
 
         # Print summary information
         print(f"\nResults have been saved to {csv_filename}")
-        print("\nSearch Summary:")
-        print(f"Total files searched: {len(php_files)}")
         print("\nPotential Matches:\n")
 
         any_matches = False

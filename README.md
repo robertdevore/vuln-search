@@ -1,71 +1,125 @@
-# Vulnerability Search Tool
+# Vulnerability Scanner
 
-This project provides a set of scripts for detecting vulnerabilities in PHP code, including SQL Injection, Remote Code Execution, XSS, and other security flaws. The scripts can be run through a bash script `vulnsearch.sh` to analyze PHP files in a specified directory and save the results in CSV format.
+## Overview
 
-## Features
+This repository contains a suite of scripts designed to identify various security vulnerabilities in PHP applications.
 
-- **Pattern Matching**: Detects various patterns indicative of vulnerabilities such as SQL Injection, Remote Code Execution, and XSS.
-- **Multi-threaded Execution**: Uses concurrent processing to speed up the scanning of files.
-- **Customizable Patterns**: Supports adding new pattern groups for different types of vulnerability detection.
-- **Results Storage**: Saves results in a `/results/` folder in CSV format.
+The tools are tailored to detect common security issues such as SQL Injection, Cross-Site Scripting, Cross-Site Request Forgery, and Remote Code Execution vulnerabilities.
 
-## Requirements
+The scanner aims to automate the detection of these issues, providing a starting point for securing web applications.
 
-- Python 3.x
-- Bash (for running `vulnsearch.sh`)
+## Tools
 
-## Installation
+### Bash Script
 
-1. Clone the repository or download the scripts.
-2. Ensure Python 3.x is installed on your system.
-3. Install required Python packages: `pip install -r requirements.txt`
+- **`vulnsearch.sh`**: This script orchestrates the execution of the individual Python tools, providing a unified interface to scan for multiple vulnerabilities across a specified directory of PHP files.
 
-Make sure to create and activate a virtual environment before installing packages.
+### Python Scripts
+
+- **`searchXSS.py`**: Detects potential XSS vulnerabilities by scanning for insecure handling of user inputs in web contexts.
+- **`searchCSRF.py`**: Identifies potential CSRF vulnerabilities by looking for insecure or missing request validation mechanisms.
+- **`searchRCE.py`**: Searches for RCE vulnerabilities, particularly focusing on dangerous function usage that could allow for arbitrary code execution.
+- **`searchSQLi.py`**: Detects SQL Injection vulnerabilities by identifying insecure SQL query constructions, especially those involving unsanitized user inputs.
+- **`searchIDOR.py`**: Detects potential IDOR (Insecure Direct Object Reference) vulnerabilities by identifying patterns where access to resources, files, or data objects is improperly controlled based on user input.
 
 ## Usage
 
-### Running the Bash Script
+### Default Behavior
 
-To run the vulnsearch.sh script, use the following command:
+If no `--tools` option is provided, the script will execute all Python scripts found in the `/scripts/` directory. Similarly, if the `--patterns` option is not specified, the default pattern group all will be used.
 
-`./vulnsearch.sh --patterns PATTERN [--tools INDEXES] [--directory DIRECTORY]`
+### Using --tools
 
-*   `--patterns PATTERN`: The pattern group to use (e.g., sql_injection_patterns, remote_code_execution, xss_patterns).
-*   `--tools INDEXES`: (Optional) Comma-separated list of tool indices to run, based on their order in the scripts directory.
-*   `--directory DIRECTORY`: (Optional) Directory to scan for PHP files. Defaults to the current working directory if not specified.
+The `--tools` option allows you to specify which scripts to run by their index. The index corresponds to the position of the script in the list of found Python scripts.
 
-### Example
+**Example**
 
-`./vulnsearch.sh --patterns xss_patterns --tools 2 --directory "/path/to/folder/"`
+```
+./vulnsearch.sh --directory /path/to/your/php/files --tools 1,3,5
+```
 
-This command runs the second tool script in the `/scripts/` directory, scanning for `xss_patterns` in the specified directory.
+In this example, the script will execute the first, third, and fifth Python scripts found in the `/scripts/` directory.
 
-## Output
+### Using --patterns
 
-The results will be saved in the /results/ directory in CSV format. The filename includes a timestamp to ensure uniqueness and provide context for when the scan was performed.
+The `--patterns` option allows you to specify a particular pattern group to use during the scan. This can be useful for targeting specific types of vulnerabilities.
 
-### Adding New Patterns
+**Example**
 
-To add new patterns for detection:
+```
+./vulnsearch.sh --directory /path/to/your/php/files --patterns sql_injection_patterns
+```
 
-* Open the corresponding Python script for the vulnerability type.
-* Modify the PATTERNS dictionary to include your new patterns.
-* Ensure the pattern group is listed correctly in the script's argument parsing section.
+In this example, the script will use the `sql_injection_patterns` group for the scan.
+
+### Output
+
+The results are saved in CSV format in the results directory, with filenames indicating the date and time of the scan. The total execution time is displayed in the terminal after the scan completes.
+
+### Available patterns
+
+**1. Cross-Site Scripting (XSS) Patterns**
+
+*   direct_output
+*   html_attributes
+*   javascript_context
+*   event_handlers
+*   url_redirection
+*   html_tags
+*   javascript_functions
+*   reflected_stored_xss
+*   csp_bypasses
+*   json_handling
+*   miscellaneous
+
+**2. Cross-Site Request Forgery (CSRF) Patterns**
+
+*   general_csrf_patterns
+*   wordpress_specific_patterns
+*   framework_specific_patterns
+*   ruby_on_rails_patterns
+*   javascript_csrf_patterns
+*   common_csrf_mechanisms
+*   blade_template_patterns
+
+**3. Remote Code Execution (RCE) Patterns**
+
+*   general_exec_functions
+*   general_eval_functions
+*   general_file_inclusion
+*   general_dynamic_function_calls
+*   wordpress_file_uploads
+*   wordpress_plugin_theme_functions
+*   wordpress_arbitrary_file_inclusion
+*   blade_insecure_syntax
+*   laravel_file_handling
+*   laravel_dynamic_route_definitions
+*   laravel_unserialize_eval
+
+**4. SQL Injection (SQLi) Patterns**
+
+*   direct_sql_queries
+*   sql_injection_patterns
+*   direct_database_calls
+*   additional_patterns
+*   unsafe_php_functions
+
+**5. IDOR Patterns**
+
+*   idor_parametrized_queries
+*   idor_file_access
+*   idor_url_parameters
+
+These names represent the categories of patterns that the scripts are configured to detect, and they guide the scanning process for potential vulnerabilities.
 
 ## Contributing
 
-Contributions are welcome! Please follow these steps:
-
-* Fork the repository.
-* Create a new branch (git checkout -b feature-branch).
-* Make your changes and commit them (git commit -am 'Add new feature').
-* Push to the branch (git push origin feature-branch).
-* Create a new Pull Request.
+Contributions are welcome! If you have suggestions for new patterns, improvements to the scripts, or bug fixes, please open an issue or submit a pull request.
 
 ## License
 
-This project is licensed under the GPLv3 License. See the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Disclaimer
 
-This tool is provided as-is for educational purposes. The authors are not responsible for any misuse or damage caused by using this tool.
+This tool is intended for educational and testing purposes only. The author is not responsible for any misuse or damage caused by the use of this tool.

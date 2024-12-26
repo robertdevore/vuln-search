@@ -58,6 +58,9 @@ if [ ${#SELECTED_TOOLS[@]} -eq 0 ]; then
   done
 fi
 
+# Record the start time
+start_time=$(date +%s)
+
 # Loop through each specified tool and execute it with the provided patterns and directory
 for INDEX in "${SELECTED_TOOLS[@]}"; do
   SCRIPT_INDEX=$((INDEX-1))
@@ -72,3 +75,10 @@ for INDEX in "${SELECTED_TOOLS[@]}"; do
     echo "Warning: Tool index $INDEX does not exist or file not found. Skipping."
   fi
 done
+
+# Record the end time
+end_time=$(date +%s)
+
+# Calculate and display the total elapsed time
+elapsed_time=$((end_time - start_time))
+echo -e "\nTotal execution time: ${elapsed_time} seconds"
