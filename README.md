@@ -1,8 +1,8 @@
-# Vulnerability Scanner
+# Vuln Search
+
+An open source vulnerability scanner to help identify various security vulnerabilities in PHP applications.
 
 ## Overview
-
-This repository contains a suite of scripts designed to identify various security vulnerabilities in PHP applications.
 
 The tools are tailored to detect common security issues such as SQL Injection, Cross-Site Scripting, Cross-Site Request Forgery, and Remote Code Execution vulnerabilities.
 
